@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -27,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingWorker;
 
 import dt.asm.App;
 import dt.asm.DbService;
@@ -260,9 +262,31 @@ public class UiMain implements ActionListener
 	public void handleEntry() throws SQLException
 	{
 		final String text = uiEntry.getText();
-		final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
-		System.out.println("Got " + dbresults.size() + " results");
-		results.setText(String.join("", dbresults));
+		final SwingWorker<String, Void> dbworker = new SwingWorker<>() {
+
+			@Override
+			protected String doInBackground() throws Exception 
+			{
+				final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
+				System.out.println("Got " + dbresults.size() + " results");
+				return String.join("", dbresults);
+			}
+			
+			@Override
+			protected void done()
+			{
+				try 
+				{
+					final String characters = get();
+					results.setText(characters);
+				}
+				catch (InterruptedException | ExecutionException e) 
+				{
+					UiUtils.printException(e);
+				}
+			}
+		};
+		dbworker.execute();
 	}
 
 	@Override
