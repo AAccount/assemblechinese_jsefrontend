@@ -303,14 +303,7 @@ public class UiMain implements ActionListener
 				handleMenuSqliteInit();
 				return;
 			case UI_ENTRY:
-				try 
-				{
-					handleEntry();
-				}
-				catch (SQLException e) 
-				{
-					UiUtils.printException(e);
-				}
+				handleEntry();
 				return;
 		}
 
