@@ -245,10 +245,7 @@ public class UiMain implements ActionListener
 			{
 				final String currentText = uiEntry.getText();
 				asmText = currentText;
-				if(!disasmText.isBlank())
-				{
-					uiEntry.setText(disasmText);
-				}
+				uiEntry.setText(disasmText);
 			}
 		}
 		else
@@ -258,10 +255,7 @@ public class UiMain implements ActionListener
 			{
 				final String currentText = uiEntry.getText();
 				disasmText = currentText;
-				if(!asmText.isBlank())
-				{
-					uiEntry.setText(asmText);
-				}
+				uiEntry.setText(asmText);
 			}
 		}
 	}

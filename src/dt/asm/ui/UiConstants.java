@@ -15,12 +15,12 @@ public class UiConstants
 	public static final Insets nopadding = new Insets(0,0,0,0);
 
 	public static final int FONT_PART = 16;
-	public static final int FONT_MEDIUM = 20;
+	public static final int FONT_MEDIUM = 24;
 
 	public static final String FLAG_TRACER = "SHOW_TRACER";
 	public static final String FLAG_SAVE_ENTRY = "SAVE_ENTRY_TEXT";
 	private static final Map<String, Boolean> flagMap = Map.ofEntries(
-		Map.entry(FLAG_TRACER, true),
+		Map.entry(FLAG_TRACER, false),
 		Map.entry(FLAG_SAVE_ENTRY, true)
 	);
 
