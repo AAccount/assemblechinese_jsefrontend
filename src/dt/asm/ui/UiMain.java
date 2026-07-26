@@ -219,20 +219,30 @@ public class UiMain implements ActionListener
 		final File file = fc.getSelectedFile();
 		disableEntry("Importing " + file.getName());
 
-		final Thread importer = new Thread(() -> { 
-			
-			try
+		final SwingWorker<Void, Void> dbworker = new SwingWorker<>() {
+
+			@Override
+			protected Void doInBackground() throws Exception 
 			{
-				final Map<Integer, List<List<Integer>>> disasm =new IdsParser().parse(file.toPath());
-				db.saveIdsParse(disasm);
+				try
+				{
+					final Map<Integer, List<List<Integer>>> disasm = new IdsParser().parse(file.toPath());
+					db.saveIdsParse(disasm);
+				}
+				catch(Exception e)
+				{
+					UiUtils.printException(e);
+				}
+				return null;
 			}
-			catch(Exception e)
+
+			@Override
+			protected void done()
 			{
-				UiUtils.printException(e);
+				enableEntry();
 			}
-			enableEntry();
-		});
-		importer.start();	
+		};
+		dbworker.execute();
 	}
 
 	public void handleModeButton()
