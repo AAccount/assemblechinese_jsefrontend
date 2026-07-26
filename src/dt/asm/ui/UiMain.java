@@ -259,7 +259,7 @@ public class UiMain implements ActionListener
 		}
 	}
 
-	public void handleEntry() throws SQLException
+	public void handleEntry()
 	{
 		final String text = uiEntry.getText();
 		final SwingWorker<String, Void> dbworker = new SwingWorker<>() {
