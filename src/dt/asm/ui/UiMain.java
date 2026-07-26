@@ -24,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
@@ -44,26 +45,27 @@ public class UiMain implements ActionListener
 	private static final String FLAG_MENU_UI_PREFIX = "menu ui flag";
 	private static final String JMENU_ITEM_UI_DELIM = ";";
 	private static final String UI_BUTTON_PRESET_PREFIX = "preset part";
+	private static final String UI_RESULTS = "results";
 
 	private static final int UI_ROW_ENTRY = 0;
 	private static final int UI_ROW_PREFIX = 1;
 	private static final int UI_ROW_TOP = 2;
-	private static final int UI_ROW_FEET = 3;
-	private static final int UI_ROW_ROOT = 4;
-	private static final int UI_ROW_COVERING = 5;
-	private static final int UI_ROW_SIDE = 6;
+	private static final int UI_ROW_FEET_ROOT_SIDE = 3;
+	private static final int UI_ROW_COVERING = 4;
+	private static final int UI_ROW_RESULTS = 5;
 	
 	private static final List<String> PREFIXES = List.of("氵", "扌", "", "忄", "虫", "申", "糸", "彳", "亻", "礻", "禾(科)", "士(壤)");
 	private static final List<String> TOPS = List.of("⺈", "𡭔", "爫", "𦥯", "", "𠂉", "", "冖", "覀", "𥫗", "宀");
-	private static final List<String> FEET = List.of("𧘇", "八(真)", "灬");
-	private static final List<String> ROOTS = List.of("疒", "广");
+	private static final List<String> FEET_ROOT_SIDE = List.of("𧘇", "八(真)", "灬", "疒", "广","廴", "辶");
 	private static final List<String> COVERINGS = List.of("𠘨 (風)", "匚", "戊(戚)", "⺆(調)", "");
-	private static final List<String> SIDES = List.of("廴", "辶");
 
 	private DbService db;
 	private final JTextField uiEntry;
 	private final JToggleButton uiMode;
 	private final JMenu flagMenu;
+	private final JTextArea results;
+	private String asmText = "";
+	private String disasmText = "";
 
 	public UiMain() throws ClassNotFoundException, IOException, ParseException, SQLException
 	{
@@ -72,6 +74,7 @@ public class UiMain implements ActionListener
 		this.uiEntry = new JTextField(ENTRY_INITIAL_WIDTH);
 		this.uiMode = new JToggleButton(UI_MODE_ASM);
 		this.flagMenu = new JMenu("Flags");
+		this.results = new JTextArea();
 	}
 
 	public void render()
@@ -84,15 +87,25 @@ public class UiMain implements ActionListener
 		renderEntry(root);
 		renderPreset(UI_ROW_PREFIX, PREFIXES, root);
 		renderPreset(UI_ROW_TOP, TOPS, root);
-		renderPreset(UI_ROW_FEET, FEET, root);
-		renderPreset(UI_ROW_ROOT, ROOTS, root);
+		renderPreset(UI_ROW_FEET_ROOT_SIDE, FEET_ROOT_SIDE, root);
 		renderPreset(UI_ROW_COVERING, COVERINGS, root);
-		renderPreset(UI_ROW_SIDE, SIDES, root);
+		renderResults(root);
 
 		window.add(root);
 		window.setJMenuBar(renderMenu());
 		window.pack();
 		window.setVisible(true);
+	}
+
+	private void renderResults(JPanel root)
+	{
+		results.setName(UI_RESULTS);
+		results.setEditable(false);
+		results.setLineWrap(true);
+		results.setFont(UiUtils.makeFont(results, UiConstants.FONT_MEDIUM));
+
+		final Insets insets = UiUtils.makeInsets(Set.of(Neighbor.TOP));
+		root.add(results, UiUtils.makeGridConstraint(UI_ROW_RESULTS, 0, Expansion.BOTH, true, insets));
 	}
 
 	private JMenuBar renderMenu()
@@ -148,7 +161,7 @@ public class UiMain implements ActionListener
 			presetButton.addActionListener(this);
 			presetButton.setFont(UiUtils.makeFont(presetButton, UiConstants.FONT_PART));
 
-			final GridBagConstraints buttonConstraints = UiUtils.makeGridConstraint(0, col, Expansion.VERTICAL, true, insets);
+			final GridBagConstraints buttonConstraints = UiUtils.makeGridConstraint(0, col, Expansion.NONE, true, insets);
 			presetButtons.add(presetButton, buttonConstraints);
 			col++;
 		}
@@ -156,8 +169,8 @@ public class UiMain implements ActionListener
 		final GridBagConstraints fillerConstraints = UiUtils.makeGridConstraint(0, col, Expansion.BOTH, true, insets);
 		presetButtons.add(filler, fillerConstraints);
 
-		final GridBagConstraints buttonRowConstraints = UiUtils.makeGridConstraint(row, 0, Expansion.BOTH, true, insets);
-		buttonRowConstraints.gridwidth = 2;
+		final GridBagConstraints buttonRowConstraints = UiUtils.makeGridConstraint(row, 0, Expansion.HORIZONTAL, true, UiConstants.nopadding);
+		// buttonRowConstraints.gridwidth = 2;
 		root.add(scrollPane, buttonRowConstraints);
 	}
 
@@ -166,16 +179,19 @@ public class UiMain implements ActionListener
 		final int COL_ENTRY = 0;
 		final int COL_MODE = 1;
 
+		final JPanel entryWrapper = new JPanel(new GridBagLayout());
 		uiEntry.setName(UI_ENTRY);
 		uiEntry.addActionListener(this);
 		uiEntry.setBorder(UiConstants.TRACER());
 		uiEntry.setFont(UiUtils.makeFont(uiEntry, UiConstants.FONT_MEDIUM));
-		root.add(uiEntry, UiUtils.makeGridConstraint(UI_ROW_ENTRY, COL_ENTRY, Expansion.HORIZONTAL, true, UiUtils.makeInsets(Set.of(Neighbor.RIGHT))));
+		entryWrapper.add(uiEntry, UiUtils.makeGridConstraint(0, COL_ENTRY, Expansion.HORIZONTAL, true, UiConstants.nopadding));
 
 		uiMode.setName(UI_MODE);
 		uiMode.addActionListener(this);
 		uiMode.setBorder(UiConstants.TRACER());
-		root.add(uiMode, UiUtils.makeGridConstraint(UI_ROW_ENTRY, COL_MODE, Expansion.VERTICAL, true, UiUtils.makeInsets(Set.of(Neighbor.LEFT))));
+		entryWrapper.add(uiMode, UiUtils.makeGridConstraint(0, COL_MODE, Expansion.VERTICAL, true, UiConstants.nopadding));
+
+		root.add(entryWrapper, UiUtils.makeGridConstraint(UI_ROW_ENTRY, 0, Expansion.HORIZONTAL, true, UiUtils.makeInsets(Set.of(Neighbor.BOTTOM))));
 	}
 
 	private void disableEntry(String message)
@@ -220,6 +236,44 @@ public class UiMain implements ActionListener
 		importer.start();	
 	}
 
+	public void handleModeButton()
+	{
+		if(uiMode.isSelected())
+		{
+			uiMode.setText(UI_MODE_DISASM);
+			if(UiConstants.getFlag(UiConstants.FLAG_SAVE_ENTRY))
+			{
+				final String currentText = uiEntry.getText();
+				asmText = currentText;
+				if(!disasmText.isBlank())
+				{
+					uiEntry.setText(disasmText);
+				}
+			}
+		}
+		else
+		{
+			uiMode.setText(UI_MODE_ASM);
+			if(UiConstants.getFlag(UiConstants.FLAG_SAVE_ENTRY))
+			{
+				final String currentText = uiEntry.getText();
+				disasmText = currentText;
+				if(!asmText.isBlank())
+				{
+					uiEntry.setText(asmText);
+				}
+			}
+		}
+	}
+
+	public void handleEntry() throws SQLException
+	{
+		final String text = uiEntry.getText();
+		final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
+		System.out.println("Got " + dbresults.size() + " results");
+		results.setText(String.join("", dbresults));
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent event) 
 	{
@@ -228,17 +282,21 @@ public class UiMain implements ActionListener
 		switch(sourceName)
 		{
 			case UI_MODE:
-				if(uiMode.isSelected())
-				{
-					uiMode.setText(UI_MODE_DISASM);
-				}
-				else
-				{
-					uiMode.setText(UI_MODE_ASM);
-				}
+				handleModeButton();
 				return;
 			case MENU_SQLITE_INIT:
 				handleMenuSqliteInit();
+				return;
+			case UI_ENTRY:
+				try 
+				{
+					handleEntry();
+				}
+				catch (SQLException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return;
 		}
 

@@ -22,7 +22,7 @@ public class UiUtils
 
 	public enum Expansion
 	{
-		HORIZONTAL, VERTICAL, BOTH;
+		HORIZONTAL, VERTICAL, BOTH, NONE;
 
 		public boolean horizontal()
 		{
