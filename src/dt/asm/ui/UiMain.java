@@ -188,8 +188,7 @@ public class UiMain implements ActionListener
 
 		uiMode.setName(UI_MODE);
 		uiMode.addActionListener(this);
-		uiMode.setBorder(UiConstants.TRACER());
-		entryWrapper.add(uiMode, UiUtils.makeGridConstraint(0, COL_MODE, Expansion.VERTICAL, true, UiConstants.nopadding));
+		entryWrapper.add(uiMode, UiUtils.makeGridConstraint(0, COL_MODE, Expansion.VERTICAL, true, new Insets(0, 10, 0, 0)));
 
 		root.add(entryWrapper, UiUtils.makeGridConstraint(UI_ROW_ENTRY, 0, Expansion.HORIZONTAL, true, UiUtils.makeInsets(Set.of(Neighbor.BOTTOM))));
 	}
@@ -198,12 +197,10 @@ public class UiMain implements ActionListener
 	{
 		uiEntry.setEditable(false);
 		uiEntry.setText(message);
-		// progressBar.setVisible(true);
 	}
 	
 	private void enableEntry()
 	{
-		// progressBar.setVisible(false);
 		uiEntry.setText("");
 		uiEntry.setEditable(true);
 	}
@@ -288,8 +285,7 @@ public class UiMain implements ActionListener
 				}
 				catch (SQLException e) 
 				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					UiUtils.printException(e);
 				}
 				return;
 		}
