@@ -1,7 +1,7 @@
 package dt.asm.ui;
 import java.awt.Color;
 import java.awt.Insets;
-
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,10 +19,10 @@ public class UiConstants
 
 	public static final String FLAG_TRACER = "SHOW_TRACER";
 	public static final String FLAG_SAVE_ENTRY = "SAVE_ENTRY_TEXT";
-	private static final Map<String, Boolean> flagMap = Map.ofEntries(
+	private static final Map<String, Boolean> flagMap = new HashMap<>(Map.ofEntries(
 		Map.entry(FLAG_TRACER, false),
 		Map.entry(FLAG_SAVE_ENTRY, true)
-	);
+	));
 
 	//DO NOT USE ON BUTTONS Causes weird rendering.
 	public static Border TRACER()
