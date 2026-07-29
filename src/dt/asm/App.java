@@ -17,6 +17,22 @@ public class App
 	public static final String VERSION = "1.0";
 	public static void main(String[] args) throws Exception 
 	{
+		loadFonts();
+		
+		javax.swing.SwingUtilities.invokeLater(() -> {
+			try 
+			{
+				new UiMain().render();
+			}
+			catch (ClassNotFoundException | IOException | ParseException | SQLException e) 
+			{
+				e.printStackTrace();
+			}
+		});
+	}
+
+	private static void loadFonts()
+	{
 		try 
 		{
 			final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -68,16 +84,5 @@ public class App
 			e.printStackTrace();
 			System.out.println("Font fallback chain mapping failed. Defaulting to system fonts.");
 		}
-
-		javax.swing.SwingUtilities.invokeLater(() -> {
-			try 
-			{
-				new UiMain().render();
-			}
-			catch (ClassNotFoundException | IOException | ParseException | SQLException e) 
-			{
-				e.printStackTrace();
-			}
-		});
 	}
 }
