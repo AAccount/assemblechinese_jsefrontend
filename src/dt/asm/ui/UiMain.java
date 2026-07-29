@@ -3,11 +3,8 @@ package dt.asm.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +31,7 @@ import dt.asm.parser.IdsParser;
 import dt.asm.ui.UiUtils.Expansion;
 import dt.asm.ui.UiUtils.Neighbor;
 
-public class UiMain implements ActionListener 
+public class UiMain
 {
 	private static final Logger logger = Logger.getLogger(UiMain.class.getName());
 
@@ -128,7 +125,9 @@ public class UiMain implements ActionListener
 		final JMenuItem sqliteInit = new JMenuItem("Initalize with IDS.txt");
 		sqliteInit.setMnemonic(KeyEvent.VK_I);
 		sqliteInit.setName(MENU_SQLITE_INIT);
-		sqliteInit.addActionListener(this);
+		sqliteInit.addActionListener(e -> {
+			handleMenuSqliteInit();
+		});
 		sqliteMenu.add(sqliteInit);
 
 		flagMenu.setMnemonic(KeyEvent.VK_F);
@@ -149,7 +148,12 @@ public class UiMain implements ActionListener
 			final JMenuItem flagItem = new JMenuItem(label);
 			
 			flagItem.setName(FLAG_MENU_UI_PREFIX + JMENU_ITEM_UI_DELIM + flagName);
-			flagItem.addActionListener(this);
+			flagItem.addActionListener(event -> {
+				final JComponent source = (JComponent)event.getSource();
+				final String flag = source.getName().substring(FLAG_MENU_UI_PREFIX.length()+JMENU_ITEM_UI_DELIM.length());
+				UiConstants.toggleFlag(flag);
+				renderFlagMenu();
+			});
 			flagMenu.add(flagItem);
 		}
 	}
@@ -168,7 +172,12 @@ public class UiMain implements ActionListener
 			presetButton.setText(preset);
 			final String first = Character.toString(preset.codePointAt(0));
 			presetButton.setName(UI_BUTTON_PRESET_PREFIX + first);
-			presetButton.addActionListener(this);
+			presetButton.addActionListener(event -> {
+				final JComponent source = (JComponent)event.getSource();
+				final String part = Character.toString(source.getName().codePointAt(UI_BUTTON_PRESET_PREFIX.length()));
+				final String currentText = uiEntry.getText();
+				uiEntry.setText(currentText + part);
+			});
 			presetButton.setFont(UiUtils.makeFont(presetButton, UiConstants.FONT_PART));
 
 			final GridBagConstraints buttonConstraints = UiUtils.makeGridConstraint(0, col, Expansion.NONE, true, insets);
@@ -191,13 +200,17 @@ public class UiMain implements ActionListener
 
 		final JPanel entryWrapper = new JPanel(new GridBagLayout());
 		uiEntry.setName(UI_ENTRY);
-		uiEntry.addActionListener(this);
+		uiEntry.addActionListener(e -> {
+			handleEntry();
+		});
 		uiEntry.setBorder(UiConstants.TRACER());
 		uiEntry.setFont(UiUtils.makeFont(uiEntry, UiConstants.FONT_MEDIUM));
 		entryWrapper.add(uiEntry, UiUtils.makeGridConstraint(0, COL_ENTRY, Expansion.HORIZONTAL, true, UiConstants.nopadding));
 
 		uiMode.setName(UI_MODE);
-		uiMode.addActionListener(this);
+		uiMode.addActionListener(e -> {
+			handleModeButton();
+		});
 		entryWrapper.add(uiMode, UiUtils.makeGridConstraint(0, COL_MODE, Expansion.VERTICAL, true, new Insets(0, 10, 0, 0)));
 
 		root.add(entryWrapper, UiUtils.makeGridConstraint(UI_ROW_ENTRY, 0, Expansion.HORIZONTAL, true, UiUtils.makeInsets(Set.of(Neighbor.BOTTOM))));
@@ -230,25 +243,26 @@ public class UiMain implements ActionListener
 		final SwingWorker<Void, Void> dbworker = new SwingWorker<>() {
 
 			@Override
-			protected Void doInBackground()
+			protected Void doInBackground() throws Exception 
 			{
-				try
-				{
-					final Map<Integer, List<List<Integer>>> disasm = new IdsParser().parse(file.toPath());
-					db.saveIdsParse(disasm);
-				}
-				catch(Exception e)
-				{
-					logger.severe(UiUtils.printStackTrace(e));
-					UiUtils.exceptionPopup(e);
-				}
+				final Map<Integer, List<List<Integer>>> disasm = new IdsParser().parse(file.toPath());
+				db.saveIdsParse(disasm);
 				return null;
 			}
 
 			@Override
 			protected void done()
 			{
-				enableEntry();
+				try
+				{
+					enableEntry();
+					get();
+				}
+				catch(Exception e)
+				{
+					logger.severe(UiUtils.printStackTrace(e));
+					UiUtils.exceptionPopup(e);
+				}
 			}
 		};
 		dbworker.execute();
@@ -285,21 +299,11 @@ public class UiMain implements ActionListener
 		final SwingWorker<String, Void> dbworker = new SwingWorker<>() {
 
 			@Override
-			protected String doInBackground() 
+			protected String doInBackground() throws Exception 
 			{
-				try 
-				{
-					final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
-					logger.info("Got " + dbresults.size() + " results");
-					return String.join("", dbresults);
-				}
-				catch(SQLException e) 
-				{
-					logger.severe(UiUtils.printStackTrace(e));
-					UiUtils.exceptionPopup(e);
-					return "(error, check logs)";
-				}
-				
+				final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
+				logger.info("Got " + dbresults.size() + " results");
+				return String.join("", dbresults);
 			}
 			
 			@Override
@@ -312,45 +316,12 @@ public class UiMain implements ActionListener
 				}
 				catch(Exception e) 
 				{
+					results.setText("error, check logs");
 					logger.severe(UiUtils.printStackTrace(e));
 					UiUtils.exceptionPopup(e);
 				}
 			}
 		};
 		dbworker.execute();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent event) 
-	{
-		final JComponent source = (JComponent)event.getSource();
-		final String sourceName = source.getName();
-		logger.info("got action from " + sourceName);
-		switch(sourceName)
-		{
-			case UI_MODE:
-				handleModeButton();
-				return;
-			case MENU_SQLITE_INIT:
-				handleMenuSqliteInit();
-				return;
-			case UI_ENTRY:
-				handleEntry();
-				return;
-		}
-
-		if(sourceName.startsWith(FLAG_MENU_UI_PREFIX))
-		{
-			final String flagName = sourceName.substring(FLAG_MENU_UI_PREFIX.length()+JMENU_ITEM_UI_DELIM.length());
-			UiConstants.toggleFlag(flagName);
-			renderFlagMenu();
-		}
-
-		if(sourceName.startsWith(UI_BUTTON_PRESET_PREFIX))
-		{
-			final String part = Character.toString(source.getName().codePointAt(UI_BUTTON_PRESET_PREFIX.length()));
-			final String currentText = uiEntry.getText();
-			uiEntry.setText(currentText + part);
-		}
 	}
 }
