@@ -3,7 +3,10 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.swing.JOptionPane;
 
 public class UiUtils 
@@ -87,24 +90,24 @@ public class UiUtils
 	{
 		System.err.print(e);
 		final String title = e.getClass().getName();
-		final String errorMessage = e.getMessage();
-		final String stackTrace = printStackTrace(errorMessage, e.getStackTrace());
+		final String stackTrace = printStackTrace(e);
 
 		JOptionPane.showMessageDialog(null, stackTrace, title, JOptionPane.ERROR_MESSAGE);
 		System.err.println(stackTrace);
 	}
 
-	private static String printStackTrace(String error, StackTraceElement[] stack)
+	public static String printStackTrace(Throwable t)
 	{
-		final StringBuilder sb = new StringBuilder();
-		sb.append(error).append('\n');
-		for(StackTraceElement element : stack)
+		if(t == null)
 		{
-			if(element.getClassName().startsWith("dt.asm"))
-			{
-				sb.append(element.toString()).append('\n');
-			}
+			return "";
 		}
-		return sb.toString();
+
+		final String header = t.toString();
+		final String relevant = Arrays.stream(t.getStackTrace())
+			.filter(line -> line.getClassName().startsWith("dt."))
+			.map(element -> element.toString())
+			.collect(Collectors.joining("\n"));
+		return relevant.isEmpty() ? header : header + "\n" + relevant;
 	}
 }
