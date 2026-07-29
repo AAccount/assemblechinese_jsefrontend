@@ -2,32 +2,35 @@ package dt.asm;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
-import java.text.ParseException;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
 import dt.asm.ui.UiMain;
+import dt.asm.ui.UiUtils;
 
 public class App 
 {
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "V1.0";
 	public static void main(String[] args) throws Exception 
 	{
 		loadFonts();
-		
+		setupLogger();
+
+		final Logger logger = Logger.getLogger(App.class.getName());
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+			logger.severe(thread.getName() + " " + UiUtils.printStackTrace(throwable));
+		});
 		javax.swing.SwingUtilities.invokeLater(() -> {
-			try 
-			{
-				new UiMain().render();
-			}
-			catch (ClassNotFoundException | IOException | ParseException | SQLException e) 
-			{
-				e.printStackTrace();
-			}
+			logger.info("starting assemble chinese " + VERSION);
+			new UiMain().render();
 		});
 	}
 
@@ -83,6 +86,28 @@ public class App
 		{
 			e.printStackTrace();
 			System.out.println("Font fallback chain mapping failed. Defaulting to system fonts.");
+		}
+	}
+
+	private static void setupLogger()
+	{
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT.%1$tL [%4$-7s] %2$s - %5$s%n");
+		try 
+		{
+			final Logger rootLogger = Logger.getLogger("");
+			final String tmpDir = System.getProperty("java.io.tmpdir");
+			final String logPattern = tmpDir + File.separator + "asmchinese-%g.log";
+			final FileHandler fileHandler = new FileHandler(logPattern, 5_000_000, 3, true);
+			
+			fileHandler.setFormatter(new SimpleFormatter());
+			fileHandler.setLevel(Level.ALL);
+
+			rootLogger.addHandler(fileHandler);
+			rootLogger.setLevel(Level.INFO);
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
 		}
 	}
 }

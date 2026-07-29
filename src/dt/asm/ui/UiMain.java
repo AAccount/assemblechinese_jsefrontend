@@ -7,13 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -38,6 +36,8 @@ import dt.asm.ui.UiUtils.Neighbor;
 
 public class UiMain implements ActionListener 
 {
+	private static final Logger logger = Logger.getLogger(UiMain.class.getName());
+
 	private static final String UI_ROOT = "root";
 	private static final String UI_ENTRY = "entry";
 	private static final String UI_MODE = "entry mode";
@@ -69,9 +69,17 @@ public class UiMain implements ActionListener
 	private String asmText = "";
 	private String disasmText = "";
 
-	public UiMain() throws ClassNotFoundException, IOException, ParseException, SQLException
+	public UiMain()
 	{
-		this.db = new DbService();
+		try 
+		{
+			this.db = new DbService();
+		}
+		catch (Exception e) 
+		{
+			logger.severe(UiUtils.printStackTrace(e));
+			UiUtils.exceptionPopup(e);
+		}
 		final int ENTRY_INITIAL_WIDTH = 20;
 		this.uiEntry = new JTextField(ENTRY_INITIAL_WIDTH);
 		this.uiMode = new JToggleButton(UI_MODE_ASM);
@@ -222,7 +230,7 @@ public class UiMain implements ActionListener
 		final SwingWorker<Void, Void> dbworker = new SwingWorker<>() {
 
 			@Override
-			protected Void doInBackground() throws Exception 
+			protected Void doInBackground()
 			{
 				try
 				{
@@ -231,7 +239,8 @@ public class UiMain implements ActionListener
 				}
 				catch(Exception e)
 				{
-					UiUtils.printException(e);
+					logger.severe(UiUtils.printStackTrace(e));
+					UiUtils.exceptionPopup(e);
 				}
 				return null;
 			}
@@ -272,14 +281,25 @@ public class UiMain implements ActionListener
 	public void handleEntry()
 	{
 		final String text = uiEntry.getText();
+		logger.info("got input " + text);
 		final SwingWorker<String, Void> dbworker = new SwingWorker<>() {
 
 			@Override
-			protected String doInBackground() throws Exception 
+			protected String doInBackground() 
 			{
-				final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
-				System.out.println("Got " + dbresults.size() + " results");
-				return String.join("", dbresults);
+				try 
+				{
+					final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
+					logger.info("Got " + dbresults.size() + " results");
+					return String.join("", dbresults);
+				}
+				catch(SQLException e) 
+				{
+					logger.severe(UiUtils.printStackTrace(e));
+					UiUtils.exceptionPopup(e);
+					return "(error, check logs)";
+				}
+				
 			}
 			
 			@Override
@@ -290,9 +310,10 @@ public class UiMain implements ActionListener
 					final String characters = get();
 					results.setText(characters);
 				}
-				catch (InterruptedException | ExecutionException e) 
+				catch(Exception e) 
 				{
-					UiUtils.printException(e);
+					logger.severe(UiUtils.printStackTrace(e));
+					UiUtils.exceptionPopup(e);
 				}
 			}
 		};
@@ -304,6 +325,7 @@ public class UiMain implements ActionListener
 	{
 		final JComponent source = (JComponent)event.getSource();
 		final String sourceName = source.getName();
+		logger.info("got action from " + sourceName);
 		switch(sourceName)
 		{
 			case UI_MODE:

@@ -86,11 +86,11 @@ public class UiUtils
 		);
 	}
 
-	public static void printException(Exception e)
+	public static void exceptionPopup(Throwable t)
 	{
-		System.err.print(e);
-		final String title = e.getClass().getName();
-		final String stackTrace = printStackTrace(e);
+		System.err.print(t);
+		final String title = t.getClass().getName();
+		final String stackTrace = printStackTrace(t);
 
 		JOptionPane.showMessageDialog(null, stackTrace, title, JOptionPane.ERROR_MESSAGE);
 		System.err.println(stackTrace);
