@@ -1,6 +1,7 @@
 # Assemble Chinese Java Frontend
 
 **Note:** you must initialize the sqlite database on the first run of this program. Use the `SQLite` menu's option `Initialize with IDS file` option. I got mine [here](https://babelstone.co.uk/CJK/IDS.HTML)
+
 ## Motivation
 I am mostly self taught for writing Chinese. With English being my first language, I largely adapted the existing conventions I have for writing Chinese rather than learn the official rigid stroke order rules. This gives me a lot of grief with "non google translate" handwriting recognition that insist on official stroke order. Instead of trying to invent "unofficial hand writing recognition", Google Gemini informed me of an "ids" file that has disassemblies of characters to their parts.
 
@@ -12,6 +13,8 @@ It is intended for people with moderate vocabulary size. This program works best
 ## Overview
 
 This program is designed around traditional Chinese, but will work with both. The front end presents a list of common "parts" found in (traditional) Chinese characters. The parts are currently arranged in 4 rows. The top input box is where you put either the character you want disassembled into parts, or a list of parts you want assembled into possible characters. Press `enter` to search. The results are at the bottom row.
+
+**Other note:** I am not an academic, or have any relation to linguistics. The variable names used all reflect, how someone with only an English background sees things.
 
 ## Assembly and Disassembly
 
