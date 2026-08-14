@@ -122,7 +122,7 @@ public class UiMain
 		sqliteMenu.setMnemonic(KeyEvent.VK_S);
 		sqliteMenu.getAccessibleContext().setAccessibleDescription("Modify the underlying sqlite dictionary.");
 
-		final JMenuItem sqliteInit = new JMenuItem("Initalize with IDS.txt");
+		final JMenuItem sqliteInit = new JMenuItem("Initialize with IDS.txt");
 		sqliteInit.setMnemonic(KeyEvent.VK_I);
 		sqliteInit.setName(MENU_SQLITE_INIT);
 		sqliteInit.addActionListener(e -> {
