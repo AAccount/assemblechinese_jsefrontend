@@ -36,6 +36,9 @@ Coming from and English background, the front end accepts the following substitu
 |^|𠆢|top of 合|
 |zigzag|幺|the 2 guys at the top half of 幾|
 
+## Screenshots
+![disassemble](https://github.com/AAccount/assemblechinese_jsefrontend/blob/master/screenshots/disassemble.png)
+![assemble](https://github.com/AAccount/assemblechinese_jsefrontend/blob/master/screenshots/assemble.png)
 
 ## UI Inspiratioin
 The UI code is largely adapted from the dictionary program. I am not front end by trade, so it was designed with a "works good enough", and not to be beautiful. The Java Swing of the dictionary was entirely self taught for making the dictionary.
