@@ -28,8 +28,9 @@ public class App
 		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
 			logger.severe(thread.getName() + " " + UiUtils.printStackTrace(throwable));
 		});
+		
+		logger.info("starting assemble chinese " + VERSION);
 		javax.swing.SwingUtilities.invokeLater(() -> {
-			logger.info("starting assemble chinese " + VERSION);
 			new UiMain().render();
 		});
 	}

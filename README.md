@@ -62,3 +62,6 @@ Checkout this repo and the assembly core repo in the same folder. Create `.vscod
 ```
 
 Use VSCodium's/VSCode's Java export feature. Make sure to include the fonts, and the sqlite jdbc library.
+
+## Logs
+This program keeps logs in /tmp/asmchinese-#.log in Linux.

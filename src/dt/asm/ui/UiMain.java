@@ -189,7 +189,6 @@ public class UiMain
 		presetButtons.add(filler, fillerConstraints);
 
 		final GridBagConstraints buttonRowConstraints = UiUtils.makeGridConstraint(row, 0, Expansion.HORIZONTAL, true, UiConstants.nopadding);
-		// buttonRowConstraints.gridwidth = 2;
 		root.add(scrollPane, buttonRowConstraints);
 	}
 
@@ -239,6 +238,7 @@ public class UiMain
 
 		final File file = fc.getSelectedFile();
 		disableEntry("Importing " + file.getName());
+		logger.info("got ids file " + file.getAbsolutePath());
 
 		final SwingWorker<Void, Void> dbworker = new SwingWorker<>() {
 
@@ -295,15 +295,18 @@ public class UiMain
 	public void handleEntry()
 	{
 		final String text = uiEntry.getText();
-		logger.info("got input " + text);
+		final String mode = uiMode.isSelected() ? "disassembly" : "assembly";
+		logger.info("got input " + text + " mode " + mode);
+
 		final SwingWorker<String, Void> dbworker = new SwingWorker<>() {
 
 			@Override
 			protected String doInBackground() throws Exception 
 			{
 				final List<String> dbresults = uiMode.isSelected() ? db.getPartsFor(text) : db.lookupByParts(text);
-				logger.info("Got " + dbresults.size() + " results");
-				return String.join("", dbresults);
+				final String allResults = String.join("", dbresults);
+				logger.info("got " + dbresults.size() + " results " + allResults);
+				return allResults;
 			}
 			
 			@Override
