@@ -52,17 +52,12 @@ jobs:
           
           javac -cp "$CLASSPATH" -d bin @sources.txt
 
-      # 5. Extract all reference library JARs into the bin folder for a standalone app
+      # 5. Extract the SQLite JAR into the bin folder for a standalone app
       - name: Extract Dependencies
         run: |
           cd bin
-          # Loop through and extract every library file to merge them into your app binaries
-          for jarfile in ../IdsCore/lib/*.jar; do
-            if [ -f "$jarfile" ]; then
-              jar -xf "$jarfile"
-            fi
-          done
-          # Remove internal library manifest configs to prevent corruption
+          jar -xf ../IdsCore/lib/sqlite-jdbc-3.53.2.0.jar
+          # Remove the embedded manifest file so it doesn't overwrite your main one
           rm -rf META-INF/MANIFEST.MF
 
       # 6. Copy frontend font assets straight into the compilation runtime folder
