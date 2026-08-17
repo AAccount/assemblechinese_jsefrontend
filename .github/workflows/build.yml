@@ -67,8 +67,8 @@ jobs:
           mkdir -p bin/resources/fonts
           
           # Safely copy the babel stone custom fonts into the compilation directory
-          if [ -d "JSEFrontEnd/resources/fonts" ]; then
-            cp -r JSEFrontEnd/resources/fonts/* bin/resources/fonts/
+          if [ -d "JSEFrontEnd/src/resources/fonts" ]; then
+            cp -r JSEFrontEnd/src/resources/fonts/* bin/resources/fonts/
           fi
 
       # 7. Package everything into a single standalone JAR
