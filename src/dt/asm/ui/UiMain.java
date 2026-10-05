@@ -56,7 +56,7 @@ public class UiMain
 	private static final List<String> PREFIXES = List.of("氵", "扌", "", "忄", "虫", "申", "糸", "彳", "亻", "礻", "𧾷", "禾(科)", "士(壤)");
 	private static final List<String> TOPS = List.of("⺈", "𡭔(消)", "爫", "𦥯", "", "𠂉", "", "冖", "覀", "𥫗", "宀");
 	private static final List<String> FEET_ROOT_SIDE = List.of("𧘇", "八(真)", "灬", "户", "尸", "疒", "广","厂", "廴", "辶");
-	private static final List<String> COVERINGS = List.of("𠘨 (風)", "匚", "戊(戚)", "⺆(調)", "", "貝", "隹", "臼");
+	private static final List<String> COVERINGS = List.of("𠘨 (風)", "匚", "戊(戚)", "⺆(調)", "", "貝", "隹", "臼", "士");
 
 	private DbService db;
 	private final JTextField uiEntry;
